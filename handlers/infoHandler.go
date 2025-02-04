@@ -12,7 +12,7 @@ import (
 )
 
 func InfoHandler(w http.ResponseWriter, r *http.Request) {
-	infoLimitRegex := `^\d+$`
+	validLimit := `^\d+$` // Must be an integer
 
 	use := "Welcome to the info endpoint!\n\nHere is a quick guide to use it:\n" +
 		"A valid two letter country code is required as a parameter, with an optional limit query.\nExamples: " +
@@ -20,11 +20,15 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 		"\n	/info/no?limit=10 - General info, LIMIT to 10 cities\n" +
 		"\nA list of valid country codes can be found here: https://en.wikipedia.org/wiki/ISO_3166-2"
 
-	infoLimitPattern := regexp.MustCompile(infoLimitRegex)     // Compile year format to a regex
-	countryCodePattern := regexp.MustCompile(ValidCountryCode) // Compile country code
+	// Regexes to validate country code and limit format
+	limitPattern := regexp.MustCompile(validLimit)
+	countryCodePattern := regexp.MustCompile(ValidCountryCode)
+
+	// Extract country code and potential limit query from request
 	countryCode := r.PathValue("two_letter_country_code")
 	limitQuery := r.URL.Query().Get("limit")
 
+	// If only the root path without country code, send use message
 	if countryCode == "" {
 		_, err := fmt.Fprintf(w, "%v", use)
 		if err != nil {
@@ -35,6 +39,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 		return // Return as there is no country code given
 	}
 
+	// Handle invalid country code
 	if !countryCodePattern.MatchString(countryCode) {
 		http.Error(w, "Invalid country code format:\n"+
 			"Expected: /info/{two_letter_country_code}\n"+
@@ -43,8 +48,9 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.URL.RawQuery != "" { // If we have a query, validate it
-		if limitQuery == "" || !infoLimitPattern.MatchString(limitQuery) {
+	// If we have a query, validate it
+	if r.URL.RawQuery != "" {
+		if limitQuery == "" || !limitPattern.MatchString(limitQuery) {
 			http.Error(w, "Invalid limit query:\n"+
 				"Expected format: 'NUMBER'\n"+
 				"Example: /info/no?limit=10\n"+
@@ -55,6 +61,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	var infoResponse []utils.RestCountriesJson
 
+	// Get the country info from country code
 	statusCode, err := utils.GetURL(constants.RestCountriesAPI+"alpha/"+countryCode, &infoResponse)
 	if err != nil {
 		if statusCode == http.StatusNotFound {
@@ -66,10 +73,12 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Define the post data for the cities request
 	postData := map[string]string{
 		"country": infoResponse[0].Name.Common,
 	}
 
+	// Get the cities for the country
 	cityResponse := utils.CitiesJson{}
 	statusCode, err = utils.PostURL(constants.CountriesNowAPI+"countries/cities", postData, &cityResponse)
 	if err != nil {
@@ -78,7 +87,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// If there is a limit, slice cities
+	// If there is a limit query, slice cities
 	if limitQuery != "" {
 		limit, err := strconv.Atoi(limitQuery)
 		if err != nil {
@@ -89,6 +98,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 		cityResponse.Cities = cityResponse.Cities[:limit]
 	}
 
+	// Define the response data to the user
 	finalInfo := utils.InfoJson{
 		Name:       infoResponse[0].Name.Common,
 		Continents: infoResponse[0].Continents,
@@ -100,7 +110,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 		Cities:     cityResponse.Cities,
 	}
 
-	// Convert back to Json
+	// Convert to JSON
 	jsonData, err := json.Marshal(finalInfo)
 	if err != nil {
 		log.Print("Failed to Marshal finalInfo: " + err.Error())
@@ -111,7 +121,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	// Send data
+	// Send the response to the user
 	_, err = fmt.Fprintf(w, "%v", string(jsonData))
 	if err != nil {
 		log.Print("Error when returning output: " + err.Error())
