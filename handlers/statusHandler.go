@@ -20,14 +20,14 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 
 	restStatusCode, err := utils.TestGetApi(constants.RestCountriesAPI + "alpha/" + countryCode)
 	if err != nil {
-		fmt.Println("Error fetching country data:", err)
+		log.Print("Error fetching country data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}
 
 	countriesNowStatusCode, err := utils.TestPostApi(constants.CountriesNowAPI+"countries/cities", postData)
 	if err != nil {
-		fmt.Println("Error fetching city data:", err)
+		log.Print("Error fetching city data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}

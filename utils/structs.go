@@ -5,17 +5,17 @@ type PopulationObject struct {
 	Value int `json:"value"`
 }
 
-type populationInfo struct {
+type PopulationInfo struct {
 	Country          string             `json:"country"`
 	Code             string             `json:"code"`
 	Iso3             string             `json:"iso3"`
 	PopulationCounts []PopulationObject `json:"populationCounts"`
 }
 
-type PopulationJson struct {
+type PopulationData struct {
 	Error bool           `json:"error"`
 	Msg   string         `json:"msg"`
-	Data  populationInfo `json:"data"`
+	Data  PopulationInfo `json:"data"`
 }
 
 type CitiesJson struct {
@@ -27,6 +27,10 @@ type CitiesJson struct {
 type Name struct {
 	Common   string `json:"common"`
 	Official string `json:"official"`
+}
+
+type CountryName struct {
+	Name Name `json:"name"`
 }
 
 type Flags struct {
@@ -43,6 +47,11 @@ type RestCountriesJson struct {
 	Borders    []string          `json:"borders"`
 	Flags      Flags             `json:"flags"`
 	Capital    []string          `json:"capital"`
+}
+
+type PopulationJson struct {
+	Mean   int
+	Values []PopulationObject
 }
 
 type InfoJson struct {

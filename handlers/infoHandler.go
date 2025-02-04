@@ -60,7 +60,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 		if statusCode == http.StatusNotFound {
 			http.Error(w, "No country found with that country code..", http.StatusNotFound)
 		} else {
-			fmt.Println("Error fetching country data:", err)
+			log.Print("Error fetching country data: " + err.Error())
 			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		}
 		return
@@ -73,7 +73,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 	cityResponse := utils.CitiesJson{}
 	statusCode, err = utils.PostURL(constants.CountriesNowAPI+"countries/cities", postData, &cityResponse)
 	if err != nil {
-		fmt.Println("Error fetching city data:", err)
+		log.Print("Error fetching city data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}
@@ -82,16 +82,12 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 	if limitQuery != "" {
 		limit, err := strconv.Atoi(limitQuery)
 		if err != nil {
-			fmt.Println("Error converting limit query to int:", err)
+			log.Print("Error converting limit query to int: " + err.Error())
 			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 			return
 		}
 		cityResponse.Cities = cityResponse.Cities[:limit]
 	}
-
-	// Set the appropriate headers
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
 	finalInfo := utils.InfoJson{
 		Name:       infoResponse[0].Name.Common,
@@ -106,6 +102,14 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Convert back to Json
 	jsonData, err := json.Marshal(finalInfo)
+	if err != nil {
+		log.Print("Failed to Marshal finalInfo: " + err.Error())
+		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
+	}
+
+	// Set the appropriate headers
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
 	// Send data
 	_, err = fmt.Fprintf(w, "%v", string(jsonData))
