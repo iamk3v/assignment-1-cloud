@@ -1,8 +1,8 @@
 package main
 
 import (
-	"Assigment1/constants"
-	"Assigment1/handlers"
+	"Assigment-1/constants"
+	"Assigment-1/handlers"
 	"log"
 	"net/http"
 	"os"

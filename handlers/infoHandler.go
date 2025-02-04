@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"Assigment1/constants"
-	"Assigment1/utils"
+	"Assigment-1/constants"
+	"Assigment-1/utils"
 	"encoding/json"
 	"fmt"
 	"log"
