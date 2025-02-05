@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 )
 
 const ValidCountryCode = `^[a-zA-Z]{2}$` // aa to ZZ
@@ -46,8 +47,8 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 	if countryCode == "" {
 		_, err := fmt.Fprintf(w, "%v", use)
 		if err != nil {
-			log.Print("An error occurred: " + err.Error())
-			http.Error(w, "Error when returning output", http.StatusInternalServerError)
+			log.Print("Error occurred when trying to send response: " + err.Error())
+			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 			return
 		}
 		return
@@ -76,14 +77,13 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 	// Get the country name from the country code
 	countryName := utils.CountryName{}
 	statusCode, err := utils.GetURL(constants.RESTCOUNTRIES_ROOT+"alpha/"+countryCode+"?fields=name", &countryName)
+	if statusCode == http.StatusNotFound {
+		http.Error(w, "No country found with that country code..", http.StatusNotFound)
+		return
+	}
 	if err != nil {
-		if statusCode == http.StatusNotFound {
-			log.Print("Invalid country code: " + err.Error())
-			http.Error(w, "No country found with that country code..", http.StatusNotFound)
-		} else {
-			log.Print("Error fetching country name: " + err.Error())
-			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
-		}
+		log.Print("Error fetching country name with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
+		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}
 
@@ -96,8 +96,9 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 	// Send the population post request
 	statusCode, err = utils.PostURL(constants.COUNTRIESNOW_ROOT+"countries/population", postData, &populationResponse)
 	if err != nil {
-		log.Print("Error fetching population data: " + err.Error())
+		log.Print("Error fetching population data with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
+		return
 	}
 
 	// Loop and calculate the sum of population and number of years gotten
@@ -118,6 +119,7 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print("Failed to Marshal populationInfo: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
+		return
 	}
 
 	// Set the appropriate headers
@@ -127,7 +129,7 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 	// Send the response to the user
 	_, err = fmt.Fprintf(w, "%v", string(jsonData))
 	if err != nil {
-		log.Print("Error when returning output: " + err.Error())
+		log.Print("Error occurred when trying to send send response: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}

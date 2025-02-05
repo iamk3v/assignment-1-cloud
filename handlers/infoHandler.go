@@ -44,11 +44,11 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	if countryCode == "" {
 		_, err := fmt.Fprintf(w, "%v", use)
 		if err != nil {
-			log.Print("An error occurred: " + err.Error())
-			http.Error(w, "Error when returning output", http.StatusInternalServerError)
+			log.Print("Error occurred when trying to send response: " + err.Error())
+			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 			return
 		}
-		return // Return as there is no country code given
+		return
 	}
 
 	// Handle invalid country code
@@ -75,13 +75,13 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Get the country info from country code
 	statusCode, err := utils.GetURL(constants.RESTCOUNTRIES_ROOT+"alpha/"+countryCode, &infoResponse)
+	if statusCode == http.StatusNotFound {
+		http.Error(w, "No country found with that country code..", http.StatusNotFound)
+		return
+	}
 	if err != nil {
-		if statusCode == http.StatusNotFound {
-			http.Error(w, "No country found with that country code..", http.StatusNotFound)
-		} else {
-			log.Print("Error fetching country data: " + err.Error())
-			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
-		}
+		log.Print("Error fetching country data with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
+		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}
 
@@ -94,7 +94,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	cityResponse := utils.CitiesJson{}
 	statusCode, err = utils.PostURL(constants.COUNTRIESNOW_ROOT+"countries/cities", postData, &cityResponse)
 	if err != nil {
-		log.Print("Error fetching city data: " + err.Error())
+		log.Print("Error fetching city data with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}
@@ -127,6 +127,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print("Failed to Marshal finalInfo: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
+		return
 	}
 
 	// Set the appropriate headers
@@ -136,7 +137,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	// Send the response to the user
 	_, err = fmt.Fprintf(w, "%v", string(jsonData))
 	if err != nil {
-		log.Print("Error when returning output: " + err.Error())
+		log.Print("Error occurred when trying to send send response: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}

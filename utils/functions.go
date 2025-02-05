@@ -23,8 +23,8 @@ func GetURL(url string, targetStruct interface{}) (statusCode int, err error) {
 		return res.StatusCode, fmt.Errorf("failed to decode response body: %v", err)
 	}
 
-	// If no errors, return status ok and nil for error
-	return http.StatusOK, nil
+	// If no errors, return status code and nil for error
+	return res.StatusCode, nil
 }
 
 func PostURL(url string, postData interface{}, targetStruct interface{}) (statusCode int, err error) {
@@ -49,8 +49,8 @@ func PostURL(url string, postData interface{}, targetStruct interface{}) (status
 		return res.StatusCode, fmt.Errorf("failed to decode response body: %v", err)
 	}
 
-	// If no errors, return status ok and nil for error
-	return http.StatusOK, nil
+	// If no errors, return status code and nil for error
+	return res.StatusCode, nil
 }
 
 func TestGetApi(url string) (statusCode int, err error) {
