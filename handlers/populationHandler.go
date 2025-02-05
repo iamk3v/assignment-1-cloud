@@ -75,7 +75,7 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Get the country name from the country code
 	countryName := utils.CountryName{}
-	statusCode, err := utils.GetURL(constants.RESTCOUNTRIESNOW_ROOT+"alpha/"+countryCode+"?fields=name", &countryName)
+	statusCode, err := utils.GetURL(constants.RESTCOUNTRIES_ROOT+"alpha/"+countryCode+"?fields=name", &countryName)
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			log.Print("Invalid country code: " + err.Error())
@@ -94,7 +94,7 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the population post request
-	statusCode, err = utils.PostURL(constants.COUNTRIESNOWAPI_ROOT+"countries/population", postData, &populationResponse)
+	statusCode, err = utils.PostURL(constants.COUNTRIESNOW_ROOT+"countries/population", postData, &populationResponse)
 	if err != nil {
 		log.Print("Error fetching population data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)

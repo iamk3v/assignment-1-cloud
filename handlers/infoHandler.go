@@ -74,7 +74,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	var infoResponse []utils.RestCountriesJson
 
 	// Get the country info from country code
-	statusCode, err := utils.GetURL(constants.RESTCOUNTRIESNOW_ROOT+"alpha/"+countryCode, &infoResponse)
+	statusCode, err := utils.GetURL(constants.RESTCOUNTRIES_ROOT+"alpha/"+countryCode, &infoResponse)
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			http.Error(w, "No country found with that country code..", http.StatusNotFound)
@@ -92,7 +92,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Get the cities for the country
 	cityResponse := utils.CitiesJson{}
-	statusCode, err = utils.PostURL(constants.COUNTRIESNOWAPI_ROOT+"countries/cities", postData, &cityResponse)
+	statusCode, err = utils.PostURL(constants.COUNTRIESNOW_ROOT+"countries/cities", postData, &cityResponse)
 	if err != nil {
 		log.Print("Error fetching city data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)

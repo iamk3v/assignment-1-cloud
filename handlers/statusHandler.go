@@ -31,7 +31,7 @@ func handleStatusGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Test and get the status code from RestCountriesAPI
-	restStatusCode, err := utils.TestGetApi(constants.RESTCOUNTRIESNOW_ROOT + "alpha/" + countryCode + "?fields=name")
+	restStatusCode, err := utils.TestGetApi(constants.RESTCOUNTRIES_ROOT + "alpha/" + countryCode + "?fields=name")
 	if err != nil {
 		log.Print("Error fetching country data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
@@ -39,7 +39,7 @@ func handleStatusGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Test and get the status code from CountriesNowAPI
-	countriesNowStatusCode, err := utils.TestPostApi(constants.COUNTRIESNOWAPI_ROOT+"countries/cities", postData)
+	countriesNowStatusCode, err := utils.TestPostApi(constants.COUNTRIESNOW_ROOT+"countries/cities", postData)
 	if err != nil {
 		log.Print("Error fetching city data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
