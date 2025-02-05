@@ -12,6 +12,18 @@ import (
 )
 
 func InfoHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		handleInfoGetRequest(w, r)
+	default:
+		http.Error(w, "REST method '"+r.Method+"' not supported. "+
+			"Currently only '"+http.MethodGet+"' is supported.", http.StatusNotImplemented)
+		return
+	}
+
+}
+
+func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	validLimit := `^\d+$` // Must be an integer
 
 	use := "Welcome to the info endpoint!\n\nHere is a quick guide to use it:\n" +
@@ -62,7 +74,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 	var infoResponse []utils.RestCountriesJson
 
 	// Get the country info from country code
-	statusCode, err := utils.GetURL(constants.RestCountriesAPI+"alpha/"+countryCode, &infoResponse)
+	statusCode, err := utils.GetURL(constants.RESTCOUNTRIESNOW_ROOT+"alpha/"+countryCode, &infoResponse)
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			http.Error(w, "No country found with that country code..", http.StatusNotFound)
@@ -80,7 +92,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the cities for the country
 	cityResponse := utils.CitiesJson{}
-	statusCode, err = utils.PostURL(constants.CountriesNowAPI+"countries/cities", postData, &cityResponse)
+	statusCode, err = utils.PostURL(constants.COUNTRIESNOWAPI_ROOT+"countries/cities", postData, &cityResponse)
 	if err != nil {
 		log.Print("Error fetching city data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)

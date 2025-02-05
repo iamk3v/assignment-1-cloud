@@ -13,6 +13,19 @@ import (
 const ValidCountryCode = `^[a-zA-Z]{2}$` // aa to ZZ
 
 func PopulationHandler(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case http.MethodGet:
+		handlePopulationGetRequest(w, r)
+	default:
+		http.Error(w, "REST method '"+r.Method+"' not supported. "+
+			"Currently only '"+http.MethodGet+"' is supported.", http.StatusNotImplemented)
+		return
+	}
+
+}
+
+func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 	validLimit := `^\d{4}-\d{4}$` // YYYY-YYYY
 
 	use := "Welcome to the population endpoint!\n\nHere is a quick guide to use it:\n" +
@@ -62,7 +75,7 @@ func PopulationHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the country name from the country code
 	countryName := utils.CountryName{}
-	statusCode, err := utils.GetURL(constants.RestCountriesAPI+"alpha/"+countryCode+"?fields=name", &countryName)
+	statusCode, err := utils.GetURL(constants.RESTCOUNTRIESNOW_ROOT+"alpha/"+countryCode+"?fields=name", &countryName)
 	if err != nil {
 		if statusCode == http.StatusNotFound {
 			log.Print("Invalid country code: " + err.Error())
@@ -81,7 +94,7 @@ func PopulationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the population post request
-	statusCode, err = utils.PostURL(constants.CountriesNowAPI+"countries/population", postData, &populationResponse)
+	statusCode, err = utils.PostURL(constants.COUNTRIESNOWAPI_ROOT+"countries/population", postData, &populationResponse)
 	if err != nil {
 		log.Print("Error fetching population data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)

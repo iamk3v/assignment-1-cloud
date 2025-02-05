@@ -11,6 +11,19 @@ import (
 )
 
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case http.MethodGet:
+		handleStatusGetRequest(w, r)
+	default:
+		http.Error(w, "REST method '"+r.Method+"' not supported. "+
+			"Currently only '"+http.MethodGet+"' is supported.", http.StatusNotImplemented)
+		return
+	}
+
+}
+
+func handleStatusGetRequest(w http.ResponseWriter, r *http.Request) {
 	// Define test data to use
 	countryCode := "no"
 	postData := map[string]string{
@@ -18,7 +31,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Test and get the status code from RestCountriesAPI
-	restStatusCode, err := utils.TestGetApi(constants.RestCountriesAPI + "alpha/" + countryCode + "?fields=name")
+	restStatusCode, err := utils.TestGetApi(constants.RESTCOUNTRIESNOW_ROOT + "alpha/" + countryCode + "?fields=name")
 	if err != nil {
 		log.Print("Error fetching country data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
@@ -26,7 +39,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Test and get the status code from CountriesNowAPI
-	countriesNowStatusCode, err := utils.TestPostApi(constants.CountriesNowAPI+"countries/cities", postData)
+	countriesNowStatusCode, err := utils.TestPostApi(constants.COUNTRIESNOWAPI_ROOT+"countries/cities", postData)
 	if err != nil {
 		log.Print("Error fetching city data: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
@@ -37,7 +50,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	statusData := map[string]string{
 		"countriesnowapi":  strconv.Itoa(restStatusCode),
 		"restcountriesapi": strconv.Itoa(countriesNowStatusCode),
-		"version":          constants.Version,
+		"version":          constants.VERSION,
 		"uptime":           "Not implemented yet",
 	}
 

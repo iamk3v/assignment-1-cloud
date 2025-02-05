@@ -19,11 +19,11 @@ func main() {
 	router := http.NewServeMux()
 
 	// Routes
-	router.HandleFunc(http.MethodGet+constants.StartURL+"/info/", handlers.InfoHandler) // Root path
-	router.HandleFunc(http.MethodGet+constants.StartURL+"/info/{two_letter_country_code}", handlers.InfoHandler)
-	router.HandleFunc(http.MethodGet+constants.StartURL+"/population/", handlers.PopulationHandler) // Root path
-	router.HandleFunc(http.MethodGet+constants.StartURL+"/population/{two_letter_country_code}", handlers.PopulationHandler)
-	router.HandleFunc(http.MethodGet+constants.StartURL+"/status/", handlers.StatusHandler) // Root path
+	router.HandleFunc(http.MethodGet+constants.START_URL+"/info/", handlers.InfoHandler) // Root path
+	router.HandleFunc(http.MethodGet+constants.START_URL+"/info/{two_letter_country_code}", handlers.InfoHandler)
+	router.HandleFunc(http.MethodGet+constants.START_URL+"/population/", handlers.PopulationHandler) // Root path
+	router.HandleFunc(http.MethodGet+constants.START_URL+"/population/{two_letter_country_code}", handlers.PopulationHandler)
+	router.HandleFunc(http.MethodGet+constants.START_URL+"/status/", handlers.StatusHandler) // Root path
 
 	// Listen on the designated port for traffic
 	log.Println("Starting server on port " + PORT)
