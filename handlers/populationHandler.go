@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 const ValidCountryCode = `^[a-zA-Z]{2}$` // aa to ZZ
@@ -99,6 +100,37 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 		log.Print("Error fetching population data with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
+	}
+
+	// If there is a limit query
+	if limitQuery != "" {
+		// Split the query into two years
+		years := strings.Split(limitQuery, "-")
+
+		// Extract the individual years
+		startYear, err := strconv.Atoi(years[0])
+		if err != nil {
+			log.Print("Error converting startYear to int" + err.Error())
+			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
+			return
+		}
+		endYear, err := strconv.Atoi(years[1])
+		if err != nil {
+			log.Print("Error converting endYear to int" + err.Error())
+			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
+			return
+		}
+
+		var filteredYears []utils.PopulationObject
+
+		// Loop through all years and append the year if it is between the limit query
+		for _, v := range populationResponse.Data.PopulationCounts {
+			if v.Year >= startYear && v.Year <= endYear {
+				filteredYears = append(filteredYears, v)
+			}
+		}
+		// Update the populationCount with the filtered years
+		populationResponse.Data.PopulationCounts = filteredYears
 	}
 
 	// Loop and calculate the sum of population and number of years gotten
