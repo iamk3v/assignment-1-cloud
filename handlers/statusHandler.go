@@ -4,7 +4,6 @@ import (
 	"Assigment-1/constants"
 	"Assigment-1/utils"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -59,18 +58,10 @@ func handleStatusGetRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	// Convert response data to JSON
-	jsonData, err := json.Marshal(statusData)
+	// Encode and send the response to the user
+	err = json.NewEncoder(w).Encode(statusData)
 	if err != nil {
-		log.Print("Failed to Marshal statusInfo: " + err.Error())
-		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
-		return
-	}
-
-	// Send the response to the user
-	_, err = fmt.Fprintf(w, "%v", string(jsonData))
-	if err != nil {
-		log.Print("Error occurred when trying to send send response: " + err.Error())
+		log.Print("Error occurred when trying to encode and send response: " + err.Error())
 		http.Error(w, "Error when returning output", http.StatusInternalServerError)
 		return
 	}

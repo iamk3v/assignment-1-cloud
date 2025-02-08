@@ -122,22 +122,14 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 		Cities:     cityResponse.Cities,
 	}
 
-	// Convert to JSON
-	jsonData, err := json.Marshal(finalInfo)
-	if err != nil {
-		log.Print("Failed to Marshal finalInfo: " + err.Error())
-		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
-		return
-	}
-
 	// Set the appropriate headers
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	// Send the response to the user
-	_, err = fmt.Fprintf(w, "%v", string(jsonData))
+	// Encode and send the response to the user
+	err = json.NewEncoder(w).Encode(finalInfo)
 	if err != nil {
-		log.Print("Error occurred when trying to send send response: " + err.Error())
+		log.Print("Error occurred when trying to encode and send response: " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}
