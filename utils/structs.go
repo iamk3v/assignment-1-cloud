@@ -35,8 +35,6 @@ type CountryName struct {
 
 type Flags struct {
 	Png string `json:"png"`
-	Svg string `json:"svg"`
-	Alt string `json:"alt"`
 }
 
 type RestCountriesJson struct {

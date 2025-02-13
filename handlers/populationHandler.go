@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"Assigment-1/constants"
+	"Assigment-1/config"
 	"Assigment-1/utils"
 	"encoding/json"
 	"fmt"
@@ -11,8 +11,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-const ValidCountryCode = `^[a-zA-Z]{2}$` // aa to ZZ
 
 func PopulationHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -38,7 +36,7 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Regexes to validate country code and limit format
 	limitPattern := regexp.MustCompile(validLimit)
-	countryCodePattern := regexp.MustCompile(ValidCountryCode)
+	countryCodePattern := regexp.MustCompile(config.VALID_COUNTRY_CODE)
 
 	// Extract country code and potential limit query from request
 	countryCode := r.PathValue("two_letter_country_code")
@@ -77,7 +75,7 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Get the country name from the country code
 	countryName := utils.CountryName{}
-	statusCode, err := utils.GetURL(constants.RESTCOUNTRIES_ROOT+"alpha/"+countryCode+"?fields=name", &countryName)
+	statusCode, err := utils.GetURL(config.RESTCOUNTRIES_ROOT+"alpha/"+countryCode+"?fields=name", &countryName)
 	if statusCode == http.StatusNotFound {
 		http.Error(w, "No country found with that country code..", http.StatusNotFound)
 		return
@@ -95,7 +93,7 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the population post request
-	statusCode, err = utils.PostURL(constants.COUNTRIESNOW_ROOT+"countries/population", postData, &populationResponse)
+	statusCode, err = utils.PostURL(config.COUNTRIESNOW_ROOT+"countries/population", postData, &populationResponse)
 	if err != nil {
 		log.Print("Error fetching population data with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)

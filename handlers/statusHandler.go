@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"Assigment-1/constants"
+	"Assigment-1/config"
 	"Assigment-1/utils"
 	"encoding/json"
 	"log"
@@ -30,7 +30,7 @@ func handleStatusGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Test and get the status code from RestCountriesAPI
-	restStatusCode, err := utils.TestGetApi(constants.RESTCOUNTRIES_ROOT + "alpha/" + countryCode + "?fields=name")
+	restStatusCode, err := utils.TestGetApi(config.RESTCOUNTRIES_ROOT + "alpha/" + countryCode + "?fields=name")
 	if err != nil {
 		log.Print("Error fetching country name with status code '" + strconv.Itoa(restStatusCode) + "': " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
@@ -38,7 +38,7 @@ func handleStatusGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Test and get the status code from CountriesNowAPI
-	countriesNowStatusCode, err := utils.TestPostApi(constants.COUNTRIESNOW_ROOT+"countries/cities", postData)
+	countriesNowStatusCode, err := utils.TestPostApi(config.COUNTRIESNOW_ROOT+"countries/cities", postData)
 	if err != nil {
 		log.Print("Error fetching population data with status code '" +
 			strconv.Itoa(countriesNowStatusCode) + "': " + err.Error())
@@ -48,10 +48,10 @@ func handleStatusGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Define the response data to the user
 	statusData := map[string]string{
-		"countriesnowapi":  strconv.Itoa(restStatusCode) + " - https://http.cat/status/" + strconv.Itoa(restStatusCode),
-		"restcountriesapi": strconv.Itoa(countriesNowStatusCode) + " - https://http.cat/status/" + strconv.Itoa(countriesNowStatusCode),
-		"version":          constants.VERSION,
-		"uptime":           "Not implemented yet",
+		"countriesnowapi":  strconv.Itoa(restStatusCode) + " - " + config.HTTP_CAT + strconv.Itoa(restStatusCode),
+		"restcountriesapi": strconv.Itoa(countriesNowStatusCode) + " - " + config.HTTP_CAT + strconv.Itoa(countriesNowStatusCode),
+		"version":          config.VERSION,
+		"uptime":           utils.GetUptime(),
 	}
 
 	// Set the appropriate headers

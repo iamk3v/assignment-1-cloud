@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"Assigment-1/constants"
+	"Assigment-1/config"
 	"Assigment-1/utils"
 	"encoding/json"
 	"fmt"
@@ -34,7 +34,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Regexes to validate country code and limit format
 	limitPattern := regexp.MustCompile(validLimit)
-	countryCodePattern := regexp.MustCompile(ValidCountryCode)
+	countryCodePattern := regexp.MustCompile(config.VALID_COUNTRY_CODE)
 
 	// Extract country code and potential limit query from request
 	countryCode := r.PathValue("two_letter_country_code")
@@ -74,7 +74,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	var infoResponse []utils.RestCountriesJson
 
 	// Get the country info from country code
-	statusCode, err := utils.GetURL(constants.RESTCOUNTRIES_ROOT+"alpha/"+countryCode, &infoResponse)
+	statusCode, err := utils.GetURL(config.RESTCOUNTRIES_ROOT+"alpha/"+countryCode, &infoResponse)
 	if statusCode == http.StatusNotFound {
 		http.Error(w, "No country found with that country code..", http.StatusNotFound)
 		return
@@ -92,7 +92,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Get the cities for the country
 	cityResponse := utils.CitiesJson{}
-	statusCode, err = utils.PostURL(constants.COUNTRIESNOW_ROOT+"countries/cities", postData, &cityResponse)
+	statusCode, err = utils.PostURL(config.COUNTRIESNOW_ROOT+"countries/cities", postData, &cityResponse)
 	if err != nil {
 		log.Print("Error fetching city data with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
 		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
