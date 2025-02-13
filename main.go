@@ -7,17 +7,14 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
-var StartTime time.Time
-
 func main() {
-	// Start uptime timer
+	// Start uptime timer›
 	utils.StartUptime()
 	log.Println("Started uptime timer:", utils.GetUptime())
 
-	// Define a port and check whether the os have a designated port or not
+	// Define a port and check whether the OS have a designated port or not
 	PORT := "8080"
 	if os.Getenv("PORT") != "" {
 		PORT = os.Getenv("PORT")
