@@ -80,3 +80,25 @@ func TestPostApi(url string, data interface{}) (statusCode int, err error) {
 	// Return the status code from the API and nil for error
 	return res.StatusCode, nil
 }
+
+func FilterYears(popData *PopulationData, startYear int, endYear int) {
+	var filteredYears []PopulationObject
+	// Loop through all years and append the year if it is between the limit query
+	for _, v := range popData.Data.PopulationCounts {
+		if v.Year >= startYear && v.Year <= endYear {
+			filteredYears = append(filteredYears, v)
+		}
+	}
+	// Update the populationCount with the filtered years
+	popData.Data.PopulationCounts = filteredYears
+}
+
+func CalculateYears(popData *PopulationData) (count int, sum int) {
+	// Loop and calculate the sum of population and number of years gotten
+	count, sum = 0, 0
+	for _, v := range popData.Data.PopulationCounts {
+		sum += v.Value
+		count++
+	}
+	return count, sum
+}

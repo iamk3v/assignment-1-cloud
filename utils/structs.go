@@ -47,12 +47,12 @@ type RestCountriesJson struct {
 	Capital    []string          `json:"capital"`
 }
 
-type PopulationJson struct {
+type PopulationResponseJson struct {
 	Mean   int
 	Values []PopulationObject
 }
 
-type InfoJson struct {
+type InfoResponseJson struct {
 	Name       string
 	Continents []string
 	Population int

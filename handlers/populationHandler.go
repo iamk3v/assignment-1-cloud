@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"Assigment-1/clients"
 	"Assigment-1/config"
 	"Assigment-1/utils"
 	"encoding/json"
@@ -13,7 +14,6 @@ import (
 )
 
 func PopulationHandler(w http.ResponseWriter, r *http.Request) {
-
 	switch r.Method {
 	case http.MethodGet:
 		handlePopulationGetRequest(w, r)
@@ -68,35 +68,29 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid limit query:\n"+
 				"Expected format: 'YYYY-YYYY'\n"+
 				"Example: /population/?limit=2020-2025\n"+
-				"Got: '"+limitQuery+"'", http.StatusBadRequest)
+				"Got: '"+r.URL.RawQuery+"'", http.StatusBadRequest)
 			return
 		}
 	}
 
 	// Get the country name from the country code
 	countryName := utils.CountryName{}
-	statusCode, err := utils.GetURL(config.RESTCOUNTRIES_ROOT+"alpha/"+countryCode+"?fields=name", &countryName)
-	if statusCode == http.StatusNotFound {
-		http.Error(w, "No country found with that country code..", http.StatusNotFound)
-		return
-	}
+	statusCode, err := clients.GetCountryName(w, countryCode, &countryName)
 	if err != nil {
 		log.Print("Error fetching country name with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
-		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}
 
 	// Define the response struct and post data for population request
-	populationResponse := utils.PopulationData{}
 	postData := map[string]string{
 		"country": countryName.Name.Common,
 	}
 
-	// Send the population post request
-	statusCode, err = utils.PostURL(config.COUNTRIESNOW_ROOT+"countries/population", postData, &populationResponse)
+	// Get the population
+	populationResponse := utils.PopulationData{}
+	statusCode, err = clients.GetPopulation(w, postData, &populationResponse)
 	if err != nil {
-		log.Print("Error fetching population data with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
-		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
+		log.Print("Error fetching population with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
 		return
 	}
 
@@ -106,40 +100,28 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 		years := strings.Split(limitQuery, "-")
 
 		// Extract the individual years
-		startYear, err := strconv.Atoi(years[0])
-		if err != nil {
-			log.Print("Error converting startYear to int" + err.Error())
+		startYear, convertErr := strconv.Atoi(years[0])
+		if convertErr != nil {
+			log.Print("Error converting startYear to int" + convertErr.Error())
 			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 			return
 		}
-		endYear, err := strconv.Atoi(years[1])
-		if err != nil {
-			log.Print("Error converting endYear to int" + err.Error())
+		endYear, convertErr := strconv.Atoi(years[1])
+		if convertErr != nil {
+			log.Print("Error converting endYear to int" + convertErr.Error())
 			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 			return
 		}
 
-		var filteredYears []utils.PopulationObject
-
-		// Loop through all years and append the year if it is between the limit query
-		for _, v := range populationResponse.Data.PopulationCounts {
-			if v.Year >= startYear && v.Year <= endYear {
-				filteredYears = append(filteredYears, v)
-			}
-		}
-		// Update the populationCount with the filtered years
-		populationResponse.Data.PopulationCounts = filteredYears
+		// Filter for limit
+		utils.FilterYears(&populationResponse, startYear, endYear)
 	}
 
-	// Loop and calculate the sum of population and number of years gotten
-	count, sumYears := 0, 0
-	for _, v := range populationResponse.Data.PopulationCounts {
-		sumYears += v.Value
-		count++
-	}
+	// Get count and sum of years
+	count, sumYears := utils.CalculateYears(&populationResponse)
 
 	// Define the response data to the user
-	populationInfo := utils.PopulationJson{
+	populationInfo := utils.PopulationResponseJson{
 		Mean:   sumYears / count,
 		Values: populationResponse.Data.PopulationCounts,
 	}

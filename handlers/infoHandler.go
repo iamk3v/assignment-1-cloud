@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"Assigment-1/clients"
 	"Assigment-1/config"
 	"Assigment-1/utils"
 	"encoding/json"
@@ -66,7 +67,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid limit query:\n"+
 				"Expected format: 'NUMBER'\n"+
 				"Example: /info/no?limit=10\n"+
-				"Got: '"+limitQuery+"'", http.StatusBadRequest)
+				"Got: '"+r.URL.RawQuery+"'", http.StatusBadRequest)
 			return
 		}
 	}
@@ -74,14 +75,9 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	var infoResponse []utils.RestCountriesJson
 
 	// Get the country info from country code
-	statusCode, err := utils.GetURL(config.RESTCOUNTRIES_ROOT+"alpha/"+countryCode, &infoResponse)
-	if statusCode == http.StatusNotFound {
-		http.Error(w, "No country found with that country code..", http.StatusNotFound)
-		return
-	}
+	statusCode, err := clients.GetCountryInfo(w, countryCode, &infoResponse)
 	if err != nil {
 		log.Print("Error fetching country data with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
-		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}
 
@@ -92,18 +88,17 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Get the cities for the country
 	cityResponse := utils.CitiesJson{}
-	statusCode, err = utils.PostURL(config.COUNTRIESNOW_ROOT+"countries/cities", postData, &cityResponse)
+	statusCode, err = clients.GetCities(w, postData, &cityResponse)
 	if err != nil {
 		log.Print("Error fetching city data with status code '" + strconv.Itoa(statusCode) + "': " + err.Error())
-		http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 		return
 	}
 
 	// If there is a limit query, slice cities
 	if limitQuery != "" {
-		limit, err := strconv.Atoi(limitQuery)
-		if err != nil {
-			log.Print("Error converting limit query to int: " + err.Error())
+		limit, convertErr := strconv.Atoi(limitQuery)
+		if convertErr != nil {
+			log.Print("Error converting limit query to int: " + convertErr.Error())
 			http.Error(w, "An internal error occurred..", http.StatusInternalServerError)
 			return
 		}
@@ -111,7 +106,7 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Define the response data to the user
-	finalInfo := utils.InfoJson{
+	finalInfo := utils.InfoResponseJson{
 		Name:       infoResponse[0].Name.Common,
 		Continents: infoResponse[0].Continents,
 		Population: infoResponse[0].Population,
