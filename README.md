@@ -38,14 +38,14 @@ Request: `GET info/no/?limit=10`
 Response: 
 ```json
 {
-  "Name":"Norway",
-  "Continents":["Europe"],
-  "Population":5379475,
-  "Languages":{"nno":"Norwegian Nynorsk","nob":"Norwegian Bokmål","smi":"Sami"},
-  "Borders":["FIN","SWE","RUS"],
-  "Flag":"https://flagcdn.com/w320/no.png",
-  "Capital":["Oslo"],
-  "Cities":["Abelvaer","Adalsbruk","Adland","Agotnes","Agskardet","Aker","Akkarfjord","Akrehamn","Al","Alen"]
+  "Name": "Norway",
+  "Continents": ["Europe"],
+  "Population": 5379475,
+  "Languages": {"nno":"Norwegian Nynorsk","nob":"Norwegian Bokmål","smi":"Sami"},
+  "Borders": ["FIN","SWE","RUS"],
+  "Flag": "https://flagcdn.com/w320/no.png",
+  "Capital": ["Oslo"],
+  "Cities": ["Abelvaer","Adalsbruk","Adland","Agotnes","Agskardet","Aker","Akkarfjord","Akrehamn","Al","Alen"]
 }
 ```
 
