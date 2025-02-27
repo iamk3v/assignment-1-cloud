@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func InfoHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +26,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
-	validLimit := `^\d+$` // Must be an integer
+	validLimit := `^\d+/?$` // Must be an integer
 
 	use := "Welcome to the info endpoint!\n\nHere is a quick guide to use it:\n" +
 		"A valid two letter country code is required as a parameter, with an optional limit query.\nExamples: " +
@@ -96,6 +97,10 @@ func handleInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// If there is a limit query, slice cities
 	if limitQuery != "" {
+		// Check if it ends with "/" and remove it
+		if strings.HasSuffix(limitQuery, "/") {
+			limitQuery = strings.TrimSuffix(limitQuery, "/")
+		}
 		limit, convertErr := strconv.Atoi(limitQuery)
 		if convertErr != nil {
 			log.Print("Error converting limit query to int: " + convertErr.Error())

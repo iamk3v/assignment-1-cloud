@@ -26,7 +26,7 @@ func PopulationHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
-	validLimit := `^\d{4}-\d{4}$` // YYYY-YYYY
+	validLimit := `^\d{4}-\d{4}/?$` // YYYY-YYYY
 
 	use := "Welcome to the population endpoint!\n\nHere is a quick guide to use it:\n" +
 		"A valid two letter country code is required as a parameter, with an optional limit query.\nExamples:" +
@@ -96,6 +96,10 @@ func handlePopulationGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// If there is a limit query
 	if limitQuery != "" {
+		if strings.HasSuffix(limitQuery, "/") {
+			limitQuery = strings.TrimSuffix(limitQuery, "/")
+		}
+
 		// Split the query into two years
 		years := strings.Split(limitQuery, "-")
 

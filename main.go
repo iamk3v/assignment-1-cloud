@@ -20,8 +20,10 @@ func main() {
 	// Routes
 	router.HandleFunc(config.START_URL+"/info/", handlers.InfoHandler) // Root path
 	router.HandleFunc(config.START_URL+"/info/{two_letter_country_code}", handlers.InfoHandler)
+	router.HandleFunc(config.START_URL+"/info/{two_letter_country_code}/", handlers.InfoHandler)
 	router.HandleFunc(config.START_URL+"/population/", handlers.PopulationHandler) // Root path
 	router.HandleFunc(config.START_URL+"/population/{two_letter_country_code}", handlers.PopulationHandler)
+	router.HandleFunc(config.START_URL+"/population/{two_letter_country_code}/", handlers.PopulationHandler)
 	router.HandleFunc(config.START_URL+"/status/", handlers.StatusHandler) // Root path
 	//Handle all 404 if no match found
 	router.HandleFunc("/", handlers.NotFoundHandler)
