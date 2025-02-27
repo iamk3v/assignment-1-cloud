@@ -84,6 +84,9 @@ func TestPostApi(url string, data interface{}) (statusCode int, err error) {
 func FilterYears(popData *PopulationData, startYear int, endYear int) {
 	var filteredYears []PopulationObject
 	// Loop through all years and append the year if it is between the limit query
+	if endYear < startYear {
+		endYear = startYear
+	}
 	for _, v := range popData.Data.PopulationCounts {
 		if v.Year >= startYear && v.Year <= endYear {
 			filteredYears = append(filteredYears, v)
