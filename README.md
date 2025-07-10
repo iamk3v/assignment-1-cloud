@@ -1,7 +1,31 @@
-# Assignment-1
+# Welcome to the Country Information Service!
+This is a service to fetch and display various information about a country.
 
-## Welcome to the Country Information Service!
+## Deployment
+The service can either be hosted locally or online on services such as [Render](https://render.com/).
 
+## Setup & Installation
+
+### Prerequisites
+
+- **Go:** Version 1.23 or higher.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/iamk3v/assignment-1-cloud.git
+```
+### 2. Install Dependencies
+```bash
+go mod tidy
+```
+
+### 3. Run the Application
+```bash
+go run main.go
+```
+
+## API
 This API has three resource root paths:
 ```
 /countryinfo/v1/info/
